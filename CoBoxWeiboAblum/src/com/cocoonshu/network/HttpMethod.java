@@ -1,4 +1,4 @@
-package com.cocoonshu.sina.weibo.network;
+package com.cocoonshu.network;
 
 /**
  * Http methods
