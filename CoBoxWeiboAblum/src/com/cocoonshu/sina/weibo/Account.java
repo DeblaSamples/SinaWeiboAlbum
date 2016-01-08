@@ -4,6 +4,7 @@ public class Account {
 
     private String mAppKey      = null;
     private String mAppSecret   = null;
+    private String mAuthorizationCode  = null;
     private String mAccessToken = null;
 
     public Account(String appKey, String appSecret) {
@@ -33,6 +34,14 @@ public class Account {
 
     public final void setAccessToken(String accessToken) {
         mAccessToken = accessToken;
+    }
+
+    public final void setAuthorizationCode(String authorizationCode) {
+        mAuthorizationCode = authorizationCode;
+    }
+
+    public final String getAuthorizationCode() {
+        return mAuthorizationCode;
     }
 
 }
