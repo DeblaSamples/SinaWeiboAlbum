@@ -2,10 +2,14 @@ package com.cocoonshu.sina.weibo;
 
 public class Account {
 
-    private String mAppKey      = null;
-    private String mAppSecret   = null;
-    private String mAuthorizationCode  = null;
-    private String mAccessToken = null;
+    private String mAppKey            = null;
+    private String mAppSecret         = null;
+    private String mAuthorizationCode = null;
+    private String mAccessToken       = null;
+
+    public Account() {
+        
+    }
 
     public Account(String appKey, String appSecret) {
         mAppKey    = appKey;

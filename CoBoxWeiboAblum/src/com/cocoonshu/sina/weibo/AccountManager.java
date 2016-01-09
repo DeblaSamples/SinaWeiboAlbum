@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -15,7 +16,7 @@ public class AccountManager {
     private static final String    KEY_APPSECRET    = "SinaWeiboAppSecret";
     private static AccountManager  sInstance        = null;
     private WeakReference<Context> mRefContext      = null;
-    private Account                mAccount         = null;
+    private Account                mAccount         = new Account();
     private List<OnAuthListener>   mOnAuthListeners = null;
 
     public static interface OnAuthListener {
@@ -81,12 +82,8 @@ public class AccountManager {
         appKey          = appMetaData.getString(KEY_APPKEY);
         appSecret       = appMetaData.getString(KEY_APPSECRET);
 
-        if (appKey == null || appKey.isEmpty()
-         || appSecret == null || appSecret.isEmpty()) {
-            mAccount = null;
-        } else {
-            mAccount = new Account(appKey, appSecret);
-        }
+        mAccount.setAppKey(appKey);
+        mAccount.setAppSecret(appSecret);
     }
 
     /**
@@ -114,7 +111,7 @@ public class AccountManager {
      * @return An app key string, or null
      */
     public final String getAppKey() {
-        return mAccount == null ? null : mAccount.getAppKey();
+        return mAccount.getAppKey();
     }
 
     /**
@@ -123,22 +120,28 @@ public class AccountManager {
      * @see #getAppKey()
      */
     public final String getAppSecret() {
-        return mAccount == null ? null : mAccount.getAppSecret();
+        return mAccount.getAppSecret();
     }
 
     /**
      * Authorize to the weibo api of the sina
      * @see #unauthorize()
      */
-    public void authorize() {
-        // TODO
+    public void authorize(Context context) {
+        if (context != null) {
+            
+        }
     }
 
     /**
      * Unauthorize from the weibo api of the sina
      * @see #authorize()
      */
-    public void unauthorize() {
+    public void unauthorize(Context context) {
         // TODO
+    }
+
+    public Account getAccount() {
+        return mAccount;
     }
 }
