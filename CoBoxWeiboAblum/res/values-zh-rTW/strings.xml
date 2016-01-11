@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string name="app_name">CoBox微博幻燈燈塔</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_authorize">登陸你的微博</string>
+    
+</resources>

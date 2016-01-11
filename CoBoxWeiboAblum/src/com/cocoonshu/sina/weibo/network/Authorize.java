@@ -4,6 +4,7 @@ import com.cocoonshu.network.HttpAPI;
 import com.cocoonshu.network.HttpMethod;
 import com.cocoonshu.sina.weibo.Account;
 import com.cocoonshu.sina.weibo.AccountManager;
+import com.cocoonshu.sina.weibo.Weibo;
 
 /**
  * <p>
@@ -26,11 +27,12 @@ public class Authorize extends HttpAPI {
         setParameter(WeiboAPI.PARAM_REDIRECT_URI);
         setParameter(WeiboAPI.PARAM_RESPONSE_TYPE);
         setMethod(HttpMethod.POST);
+        setUrlEncodeEnabled(false);
     }
 
     public String getApiParameterUrl(Account account) {
         return getApiParameterUrl(
-                AccountManager.getInstance().getAppKey(),
+                Weibo.getInstance().getAccountManager().getAppKey(),
                 WeiboAPI.VALUE_MOBILE,
                 WeiboAPI.AUTH_REDIRECT_URL,
                 WeiboAPI.VALUE_CODE);
@@ -48,7 +50,8 @@ public class Authorize extends HttpAPI {
             if (paramIndex >= 0) {
                 // Because '=' need one byte room
                 if (contentLenght - paramIndex - 1 > 0) {
-                    authorizeCode = responseContent.substring(paramIndex, paramTailIndex);
+                    authorizeCode = responseContent.substring(
+                            paramIndex + WeiboAPI.PARAM_CODE.length() + 1, paramTailIndex);
                 }
             }
         }

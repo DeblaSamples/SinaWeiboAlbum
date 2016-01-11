@@ -17,6 +17,8 @@ public abstract class HttpAPI {
     private String       mApiHost                   = null;
     private String       mApiInterface              = null;
     private List<String> mApiParamNames             = new LinkedList<String>();
+    private List<String> mApiParamValues            = new LinkedList<String>();
+    private boolean      mNeedEncodeUrl             = true;
     private boolean      mIsApiUrlInvalidate        = false;
     private boolean      mIsApiParametersInvalidate = false;
     private String       mApiUrlFormatedStr         = "";
@@ -38,6 +40,10 @@ public abstract class HttpAPI {
     protected final void setApiInterface(String apiInterface) {
         mApiInterface = apiInterface;
         mIsApiUrlInvalidate = true;
+    }
+
+    protected final void setUrlEncodeEnabled(boolean enabled) {
+        mNeedEncodeUrl = enabled;
     }
 
     protected final void setParameter(String apiParam) {
@@ -113,15 +119,19 @@ public abstract class HttpAPI {
      */
     public String getApiParameterUrl(String...values) {
         String resultUrl = String.format(getFormatApiParameterUrl(), values);
-        try {
-            return URLEncoder.encode(resultUrl, "utf8");
-        } catch (UnsupportedEncodingException utf8Exp) {
+        if (mNeedEncodeUrl) {
             try {
-                return URLEncoder.encode(resultUrl, Charset.defaultCharset().name());
-            } catch (UnsupportedEncodingException defaultExp) {
-                defaultExp.printStackTrace();
-                return resultUrl;
+                return URLEncoder.encode(resultUrl, "utf8");
+            } catch (UnsupportedEncodingException utf8Exp) {
+                try {
+                    return URLEncoder.encode(resultUrl, Charset.defaultCharset().name());
+                } catch (UnsupportedEncodingException defaultExp) {
+                    defaultExp.printStackTrace();
+                    return resultUrl;
+                }
             }
+        } else {
+            return resultUrl;
         }
     }
 
@@ -132,4 +142,13 @@ public abstract class HttpAPI {
      * @return
      */
     public abstract Object parseResponse(String responseContent, Object...inParams);
+    
+    final String getMethodedUrl() {
+        switch (mHttpMethod) {
+        case GET:
+            return ;
+        case POST:
+            return ;
+        }
+    }
 }

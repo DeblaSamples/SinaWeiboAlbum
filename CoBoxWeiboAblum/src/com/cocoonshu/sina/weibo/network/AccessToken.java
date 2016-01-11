@@ -7,6 +7,7 @@ import com.cocoonshu.network.HttpAPI;
 import com.cocoonshu.network.HttpMethod;
 import com.cocoonshu.sina.weibo.Account;
 import com.cocoonshu.sina.weibo.AccountManager;
+import com.cocoonshu.sina.weibo.Weibo;
 
 /**
  * <p>
@@ -35,8 +36,8 @@ public class AccessToken extends HttpAPI {
 
     public String getApiParameterUrl(Account account) {
         return getApiParameterUrl(
-                AccountManager.getInstance().getAppKey(),
-                AccountManager.getInstance().getAppSecret(),
+                Weibo.getInstance().getAccountManager().getAppKey(),
+                Weibo.getInstance().getAccountManager().getAppSecret(),
                 WeiboAPI.VALUE_AUTHORIZATION_CODE,
                 account.getAuthorizationCode(),
                 WeiboAPI.AUTH_REDIRECT_URL);

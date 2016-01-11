@@ -12,4 +12,9 @@ public class HttpResponse {
         
     }
 
+    public Object getResponseData() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

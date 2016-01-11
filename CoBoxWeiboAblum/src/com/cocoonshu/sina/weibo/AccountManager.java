@@ -1,55 +1,45 @@
 package com.cocoonshu.sina.weibo;
 
 import java.lang.ref.WeakReference;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.cocoonshu.network.HttpCode;
+import com.cocoonshu.network.HttpListener;
+import com.cocoonshu.network.HttpRequest;
+import com.cocoonshu.network.HttpRequestor;
+import com.cocoonshu.network.HttpResponse;
+import com.cocoonshu.sina.weibo.network.AccessTokenRequest;
+import com.cocoonshu.sina.weibo.network.WeiboAPI;
+import com.cocoonshu.sina.weibo.util.Config;
+import com.cocoonshu.sina.weibo.util.Debugger;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
+import android.util.Log;
 
 public class AccountManager {
 
+    private static final String    TAG              = "AccountManager";
     private static final String    KEY_APPKEY       = "SinaWeiboAppKey";
     private static final String    KEY_APPSECRET    = "SinaWeiboAppSecret";
-    private static AccountManager  sInstance        = null;
     private WeakReference<Context> mRefContext      = null;
     private Account                mAccount         = new Account();
     private List<OnAuthListener>   mOnAuthListeners = null;
+    private List<Runnable>         mAuthCallbacks   = null;
 
     public static interface OnAuthListener {
         void OnAuthSuccessed(Account account, String accessToken);
     }
 
-    /**
-     * Setup account manager, if called {@link #getInstance()} before invoking
-     * this method, null will be return.
-     * @param context Application context
-     * @throws Exception If context is null, exception will be thrown
-     * @see #getInstance()
-     */
-    public static void setup(Context context) throws Exception {
-        if (sInstance == null) {
-            sInstance = new AccountManager(context);
-        } else {
-            sInstance.setContext(context);
-        }
-    }
-
-    /**
-     * Get a instance of Account manager, if called this method before invoking
-     * {@link #setup(Context)}, null will be return.
-     * @return
-     * @see #setup(Context)
-     */
-    public static AccountManager getInstance() {
-        return sInstance;
-    }
-
-    private AccountManager(Context context) throws Exception {
+    AccountManager(Context context) {
         mOnAuthListeners = new LinkedList<OnAuthListener>();
+        mAuthCallbacks   = new LinkedList<Runnable>();
         setContext(context);
         findAuthenticationCredentials();
     }
@@ -62,11 +52,8 @@ public class AccountManager {
         mRefContext = new WeakReference<Context>(context);
     }
 
-    private void findAuthenticationCredentials() throws Exception {
+    private void findAuthenticationCredentials() {
         Context context = mRefContext.get();
-        if (context == null) {
-            throw new Exception("Context cannot be null");
-        }
 
         String          packageName     = null;
         PackageManager  packageManager  = null;
@@ -75,12 +62,22 @@ public class AccountManager {
         String          appKey          = null;
         String          appSecret       = null;
 
-        packageName     = context.getPackageName();
-        packageManager  = context.getPackageManager();
-        applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-        appMetaData     = applicationInfo.metaData;
-        appKey          = appMetaData.getString(KEY_APPKEY);
-        appSecret       = appMetaData.getString(KEY_APPSECRET);
+        try {
+            packageName     = context.getPackageName();
+            packageManager  = context.getPackageManager();
+            applicationInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+            appMetaData     = applicationInfo.metaData;
+            appKey          = String.valueOf(appMetaData.getInt(KEY_APPKEY));
+            appSecret       = appMetaData.getString(KEY_APPSECRET);
+        } catch (NameNotFoundException exp) {
+            Debugger.printTrace(
+                    TAG,
+                    "[findAuthenticationCredentials] Credentials read failed. Cannot find package " + packageName,
+                    exp);
+        }
+        Log.i(TAG, "[findAuthenticationCredentials] Authorize credential： \n"
+                 + "                                                 AppKey:    " + appKey + "\n"
+                 + "                                                 AppSecret: " + appSecret);
 
         mAccount.setAppKey(appKey);
         mAccount.setAppSecret(appSecret);
@@ -106,6 +103,10 @@ public class AccountManager {
         mOnAuthListeners.remove(listener);
     }
 
+    public Account getAccount() {
+        return mAccount;
+    }
+    
     /**
      * Get the app key of the sina weibo api
      * @return An app key string, or null
@@ -129,10 +130,69 @@ public class AccountManager {
      */
     public void authorize(Context context) {
         if (context != null) {
-            
+            Intent intent = new Intent(context, AuthorizePage.class);
+            context.startActivity(intent);
         }
     }
 
+    /**
+     * Start authorize workflow, and after authorizing, callback
+     * will be invoked.
+     * @param callback
+     */
+    public void authorize(Context context, Runnable callback) {
+        if (context != null) {
+            mAuthCallbacks.add(callback);
+            Intent intent = new Intent(Config.Intent.START_AUTHORIZE_PAGE_ACTION);
+            intent.putExtra(AuthorizePage.CallbackID, callback.hashCode());
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
+    }
+    
+    public void authorizeCallback(int authorizeCallbackID, Account account) {
+        mAccount.setAuthorizationCode(account.getAuthorizationCode());
+        takeAccessToken(authorizeCallbackID);
+    }
+    
+    /**
+     * Take access token
+     */
+    public void takeAccessToken(final int authorizeCallbackID) {
+        HttpRequest request = new AccessTokenRequest(mAccount);
+        Weibo.getInstance().submitHttpRequest(request, new HttpListener() {
+            
+            @Override
+            public void onResponed(HttpResponse response) {
+                Account account = (Account)response.getResponseData();
+                mAccount.setAccessToken(account.getAccessToken());
+                notifyAuthCallback();
+            }
+            
+            @Override
+            public void onError(HttpCode code) {
+                notifyAuthCallback();
+            }
+            
+            private void notifyAuthCallback() {
+                Iterator<Runnable> itr = mAuthCallbacks.iterator();
+                while (itr.hasNext()) {
+                    Runnable callback = itr.next();
+                    if (callback.hashCode() == authorizeCallbackID) {
+                        try {
+                            callback.run();
+                        } finally {
+                            itr.remove();
+                        }
+                        break;
+                    }
+                }
+            }
+            
+        });
+        
+    }
+    
     /**
      * Unauthorize from the weibo api of the sina
      * @see #authorize()
@@ -141,7 +201,4 @@ public class AccountManager {
         // TODO
     }
 
-    public Account getAccount() {
-        return mAccount;
-    }
 }
