@@ -20,22 +20,27 @@ import com.cocoonshu.sina.weibo.Weibo;
 public class Authorize extends HttpAPI {
 
     public Authorize() {
+        setMethod(HttpMethod.GET);
         setApiHost(WeiboAPI.AUTH_URL);
         setApiInterface(WeiboAPI.API_AUTHORIZE);
-        setParameter(WeiboAPI.PARAM_CLIENT_ID);
-        setParameter(WeiboAPI.PARAM_DISPLAY);
-        setParameter(WeiboAPI.PARAM_REDIRECT_URI);
-        setParameter(WeiboAPI.PARAM_RESPONSE_TYPE);
-        setMethod(HttpMethod.POST);
-        setUrlEncodeEnabled(false);
+        setParameterValue(WeiboAPI.PARAM_CLIENT_ID,     "");
+        setParameterValue(WeiboAPI.PARAM_DISPLAY,       WeiboAPI.VALUE_MOBILE);
+        setParameterValue(WeiboAPI.PARAM_REDIRECT_URI,  WeiboAPI.AUTH_REDIRECT_URL);
+        setParameterValue(WeiboAPI.PARAM_RESPONSE_TYPE, WeiboAPI.VALUE_CODE);
     }
 
-    public String getApiParameterUrl(Account account) {
-        return getApiParameterUrl(
-                Weibo.getInstance().getAccountManager().getAppKey(),
-                WeiboAPI.VALUE_MOBILE,
-                WeiboAPI.AUTH_REDIRECT_URL,
-                WeiboAPI.VALUE_CODE);
+    public Authorize(Account account) {
+        setMethod(HttpMethod.GET);
+        setApiHost(WeiboAPI.AUTH_URL);
+        setApiInterface(WeiboAPI.API_AUTHORIZE);
+        setParameterValue(WeiboAPI.PARAM_CLIENT_ID,     account.getAppKey());
+        setParameterValue(WeiboAPI.PARAM_DISPLAY,       WeiboAPI.VALUE_MOBILE);
+        setParameterValue(WeiboAPI.PARAM_REDIRECT_URI,  WeiboAPI.AUTH_REDIRECT_URL);
+        setParameterValue(WeiboAPI.PARAM_RESPONSE_TYPE, WeiboAPI.VALUE_CODE);
+    }
+    
+    public void setAccount(Account account) {
+        setParameterValue(WeiboAPI.PARAM_CLIENT_ID, account.getAppKey());
     }
 
     @Override

@@ -13,7 +13,6 @@ public class AccessTokenRequest extends HttpRequest {
     private Account mAccount = null;
     
     public AccessTokenRequest(Account account) {
-        super(new AccessToken());
         mAccount = account;
     }
     

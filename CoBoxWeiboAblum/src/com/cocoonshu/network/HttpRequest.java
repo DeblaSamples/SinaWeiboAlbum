@@ -1,7 +1,13 @@
 package com.cocoonshu.network;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+
+import com.cocoonshu.sina.weibo.util.Config;
+import com.cocoonshu.sina.weibo.util.Debugger;
 
 
 /**
@@ -12,9 +18,12 @@ import java.net.URL;
 @SuppressWarnings("deprecation")
 public abstract class HttpRequest {
 
-    private HttpCode     mHttpStatusCode = HttpCode.Undefined;
-    private HttpAPI      mHttpAPI        = null;
-    private HttpResponse mHttpResponse   = null;
+    private static final String TAG = "HttpRequest";
+    
+    private HttpCode      mHttpStatusCode = HttpCode.Undefined;
+    private HttpAPI       mHttpAPI        = null;
+    private HttpResponse  mHttpResponse   = null;
+    private HttpURLConnection mConnection = null;
     
     public HttpRequest() {
         
@@ -30,9 +39,50 @@ public abstract class HttpRequest {
     public void execute() {
         if (onRequestPrepare()) {
             try {
-                URL url = new URL(mHttpAPI.getApiUrl());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
+                URL url = new URL(mHttpAPI.getMethodedUrl());
+                mConnection = (HttpURLConnection) url.openConnection();
+                mConnection.setConnectTimeout(Config.Network.HttpConnectTimeout);
+                mConnection.setReadTimeout(Config.Network.HttpReadTimeout);
+                mConnection.setInstanceFollowRedirects(true);
+                mConnection.setRequestMethod(mHttpAPI.getMehthod().getMethodString());
+                
+                HttpMethod method = mHttpAPI.getMehthod();
+                switch (method) {
+                case GET:
+                    mConnection.setDoInput(true);
+                    mConnection.setDoOutput(false);
+                    break;
+
+                case POST:
+                    mConnection.setDoInput(true);
+                    mConnection.setDoOutput(true);
+                    break;
+                    
+                case OPTIONS:
+                    // FIXME
+                    break;
+                    
+                case DELETE:
+                    // FIXME
+                    break;
+                    
+                case HEAD:
+                    // FIXME
+                    break;
+                    
+                case PUT:
+                    // FIXME
+                    break;
+                    
+                case TRACE:
+                    // FIXME
+                    break;
+                  
+                }
+            } catch (MalformedURLException exp) {
+                Debugger.printTrace(TAG, "[execute] Url is invalidable.", exp);
+            } catch (IOException exp) {
+                Debugger.printTrace(TAG, "[execute] Connection open failed.", exp);
             }
             mHttpResponse = new HttpResponse();
             mHttpResponse.setResponseData(onRequest());

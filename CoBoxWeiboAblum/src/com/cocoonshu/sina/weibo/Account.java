@@ -6,6 +6,9 @@ public class Account {
     private String mAppSecret         = null;
     private String mAuthorizationCode = null;
     private String mAccessToken       = null;
+    private String mUID               = null;
+    private long   mRemindIn          = 0;
+    private long   mExpiresIn         = 0;
 
     public Account() {
         
@@ -48,4 +51,27 @@ public class Account {
         return mAuthorizationCode;
     }
 
+    public final void setExpiresIn(long expiresIn) {
+        mExpiresIn = expiresIn;
+    }
+    
+    public final long getExpiresIn() {
+        return mExpiresIn;
+    }
+    
+    public final void setRemindIn(long remindIn) {
+        mRemindIn = remindIn;
+    }
+    
+    public final long getRemindIn() {
+        return mRemindIn;
+    }
+    
+    public final void setUid(String uid) {
+        mUID = uid;
+    }
+    
+    public final String getUid() {
+        return mUID;
+    }
 }

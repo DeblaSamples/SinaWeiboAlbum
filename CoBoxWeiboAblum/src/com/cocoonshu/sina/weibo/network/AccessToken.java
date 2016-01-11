@@ -8,6 +8,7 @@ import com.cocoonshu.network.HttpMethod;
 import com.cocoonshu.sina.weibo.Account;
 import com.cocoonshu.sina.weibo.AccountManager;
 import com.cocoonshu.sina.weibo.Weibo;
+import com.cocoonshu.sina.weibo.util.Debugger;
 
 /**
  * <p>
@@ -23,44 +24,53 @@ import com.cocoonshu.sina.weibo.Weibo;
  */
 public class AccessToken extends HttpAPI {
 
+    private static final String TAG = "AccessToken";
+
     public AccessToken() {
+        setMethod(HttpMethod.POST);
         setApiHost(WeiboAPI.API_URL);
         setApiInterface(WeiboAPI.API_ACCESS_TOKEN);
-        setParameter(WeiboAPI.PARAM_CLIENT_ID);
-        setParameter(WeiboAPI.PARAM_CLIENT_SECRET);
-        setParameter(WeiboAPI.PARAM_GRANT_TYPE);
-        setParameter(WeiboAPI.PARAM_CODE);
-        setParameter(WeiboAPI.PARAM_REDIRECT_URI);
-        setMethod(HttpMethod.POST);
+        setParameterValue(WeiboAPI.PARAM_CLIENT_ID,     "");
+        setParameterValue(WeiboAPI.PARAM_CLIENT_SECRET, "");
+        setParameterValue(WeiboAPI.PARAM_GRANT_TYPE,    WeiboAPI.VALUE_AUTHORIZATION_CODE);
+        setParameterValue(WeiboAPI.PARAM_CODE,          "");
+        setParameterValue(WeiboAPI.PARAM_REDIRECT_URI,  WeiboAPI.AUTH_REDIRECT_URL);
     }
 
-    public String getApiParameterUrl(Account account) {
-        return getApiParameterUrl(
-                Weibo.getInstance().getAccountManager().getAppKey(),
-                Weibo.getInstance().getAccountManager().getAppSecret(),
-                WeiboAPI.VALUE_AUTHORIZATION_CODE,
-                account.getAuthorizationCode(),
-                WeiboAPI.AUTH_REDIRECT_URL);
+    public void getAccount(Account account) {
+        setParameterValue(
+                WeiboAPI.PARAM_CLIENT_ID,     Weibo.getInstance().getAccountManager().getAppKey(),
+                WeiboAPI.PARAM_CLIENT_SECRET, Weibo.getInstance().getAccountManager().getAppSecret(),
+                WeiboAPI.PARAM_CODE,          account.getAuthorizationCode());
     }
 
     @Override
     public Object parseResponse(String responseContent, Object...inParams) {
-        String accessToken = null;
-        String expiresIn   = null;
-        String remindIn    = null;
-        String uid         = null;
+        String  accessToken = null;
+        long    expiresIn   = 0;
+        String  remindIn    = null;
+        String  uid         = null;
+        Account account     = new Account();
+        
+        Debugger.i(TAG, "[parseResponse] Response: " + responseContent);
         if (responseContent != null && !responseContent.isEmpty()) {
             try {
                 JSONObject jsonRoot = new JSONObject(responseContent);
                 accessToken = jsonRoot.optString(WeiboAPI.JSON.KEY_ACCESS_TOKEN);
-                expiresIn   = jsonRoot.optString(WeiboAPI.JSON.KEY_EXPIRES_IN);
+                expiresIn   = jsonRoot.optLong(WeiboAPI.JSON.KEY_EXPIRES_IN);
                 remindIn    = jsonRoot.optString(WeiboAPI.JSON.KEY_REMIND_IN);
                 uid         = jsonRoot.optString(WeiboAPI.JSON.KEY_UID);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            
+            account.setAccessToken(accessToken);
+            account.setExpiresIn(expiresIn);
+            account.setRemindIn(Long.valueOf(remindIn));
+            account.setUid(uid);
         }
-        return false;
+        
+        return account;
     }
 
 }

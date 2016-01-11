@@ -46,12 +46,11 @@ public class AuthorizePage extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        mAuthorizeApi = new Authorize();
         mAccount      = Weibo.getInstance().getAccountManager().getAccount();
-        mAuthorizeUrl = mAuthorizeApi.getApiUrl() + mAuthorizeApi.getApiParameterUrl(mAccount);
-
-        Debugger.i(TAG, "[onResume] Load authorize url: " + mAuthorizeUrl);
+        mAuthorizeApi = new Authorize(mAccount);
+        mAuthorizeUrl = mAuthorizeApi.getMethodedUrl();
         mWebAuthorize.loadUrl(mAuthorizeUrl);
+        Debugger.i(TAG, "[onResume] Load authorize url: " + mAuthorizeUrl);
     }
 
     @SuppressLint("SetJavaScriptEnabled")

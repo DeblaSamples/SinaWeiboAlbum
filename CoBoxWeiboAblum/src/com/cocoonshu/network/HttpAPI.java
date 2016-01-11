@@ -3,8 +3,10 @@ package com.cocoonshu.network;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Http API package
@@ -13,16 +15,14 @@ import java.util.List;
  */
 public abstract class HttpAPI {
 
-    private HttpMethod   mHttpMethod                = HttpMethod.GET;
-    private String       mApiHost                   = null;
-    private String       mApiInterface              = null;
-    private List<String> mApiParamNames             = new LinkedList<String>();
-    private List<String> mApiParamValues            = new LinkedList<String>();
-    private boolean      mNeedEncodeUrl             = true;
-    private boolean      mIsApiUrlInvalidate        = false;
-    private boolean      mIsApiParametersInvalidate = false;
-    private String       mApiUrlFormatedStr         = "";
-    private String       mApiParametersFormatedStr  = "";
+    private HttpMethod          mHttpMethod                = HttpMethod.GET;
+    private String              mApiHost                   = null;
+    private String              mApiInterface              = null;
+    private Map<String, String> mApiParamMap               = new HashMap<String, String>();
+    private boolean             mIsApiUrlInvalidate        = false;
+    private boolean             mIsApiParametersInvalidate = false;
+    private String              mApiUrlFormatedStr         = "";
+    private String              mApiParametersFormatedStr  = "";
 
     public final HttpMethod getMehthod() {
         return mHttpMethod;
@@ -42,22 +42,37 @@ public abstract class HttpAPI {
         mIsApiUrlInvalidate = true;
     }
 
-    protected final void setUrlEncodeEnabled(boolean enabled) {
-        mNeedEncodeUrl = enabled;
-    }
-
     protected final void setParameter(String apiParam) {
-        mApiParamNames.add(apiParam);
+        mApiParamMap.put(apiParam, null);
         mIsApiParametersInvalidate = true;
     }
 
     protected final void setParameters(String...apiParams) {
         if (apiParams != null && apiParams.length > 0) {
             for (String paranm : apiParams) {
-                mApiParamNames.add(paranm);
+                mApiParamMap.put(paranm, "");
                 mIsApiParametersInvalidate = true;
             }
         }
+    }
+
+    public String getParameter(String key) {
+        return mApiParamMap.get(key);
+    }
+    
+    public void setParameterValue(String key, String value) {
+        mApiParamMap.put(key, value);
+        mIsApiParametersInvalidate = true;
+    }
+
+    public void setParameterValue(String...keyValuePairs) {
+        if (keyValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Key-Value pairs must contain even number strings.");
+        }
+        for (int i = 0; i < keyValuePairs.length; i += 2) {
+            mApiParamMap.put(keyValuePairs[i], keyValuePairs[i + 1]);
+        }
+        mIsApiParametersInvalidate = true;
     }
 
     /**
@@ -75,11 +90,11 @@ public abstract class HttpAPI {
      * Recreate api parameters formated string
      * if api parameters was changed.
      */
-    protected final void updateApiParameterUrlFormated() {
+    protected final void updateApiParameters() {
         if (mIsApiParametersInvalidate) {
             mApiParametersFormatedStr = "";
-            for (String param : mApiParamNames) {
-                mApiParametersFormatedStr += "&" + param + "=%s";
+            for (String key : mApiParamMap.keySet()) {
+                mApiParametersFormatedStr += "&" + key + "=" + mApiParamMap.get(key);
             }
             if (!mApiParametersFormatedStr.isEmpty()) {
                 mApiParametersFormatedStr = mApiParametersFormatedStr.substring(1);
@@ -100,39 +115,14 @@ public abstract class HttpAPI {
     }
 
     /**
-     * Get formated api parameters string. This string
-     * will be appended '=%s' for every each single parameter
-     * and concat all parameters with '&' automatically.
+     * Get formated api url parameters string. This
+     * string will be concat will '&' between each
+     * key value pairs of parameters.
      * @return
      */
-    public String getFormatApiParameterUrl() {
-        updateApiParameterUrlFormated();
+    public String getApiParameters() {
+        updateApiParameters();
         return mApiParametersFormatedStr;
-    }
-
-    /**
-     * Get formated api parameters string. This string
-     * will be appended value for every each single parameter
-     * and concat all parameters with '&' automatically.
-     * @param values
-     * @return
-     */
-    public String getApiParameterUrl(String...values) {
-        String resultUrl = String.format(getFormatApiParameterUrl(), values);
-        if (mNeedEncodeUrl) {
-            try {
-                return URLEncoder.encode(resultUrl, "utf8");
-            } catch (UnsupportedEncodingException utf8Exp) {
-                try {
-                    return URLEncoder.encode(resultUrl, Charset.defaultCharset().name());
-                } catch (UnsupportedEncodingException defaultExp) {
-                    defaultExp.printStackTrace();
-                    return resultUrl;
-                }
-            }
-        } else {
-            return resultUrl;
-        }
     }
 
     /**
@@ -142,13 +132,48 @@ public abstract class HttpAPI {
      * @return
      */
     public abstract Object parseResponse(String responseContent, Object...inParams);
-    
-    final String getMethodedUrl() {
+
+    /**
+     * Get methoded url for requesting. This string
+     * will be formated depends on the specified http
+     * method.
+     * @return GET will return url + parameter list
+     *         POST will return url
+     */
+    public final String getMethodedUrl() {
         switch (mHttpMethod) {
         case GET:
-            return ;
+            updateApiUrl();
+            updateApiParameters();
+            return getApiUrl() + getApiParameters();
         case POST:
-            return ;
+            updateApiUrl();
+            return getApiUrl();
+        default:
+            updateApiUrl();
+            updateApiParameters();
+            return getApiUrl() + getApiParameters();
+        }
+    }
+
+    /**
+     * Get methoded parameters for requesting.
+     * This string will be formated depends on
+     * the specified http method.
+     * @return GET will return ""
+     *         POST will return paramter list
+     */
+    public final String getMethodedParameters() {
+        switch (mHttpMethod) {
+        case GET:
+            return "";
+        case POST:
+            updateApiParameters();
+            return getApiParameters();
+        default:
+            updateApiUrl();
+            updateApiParameters();
+            return getApiUrl() + getApiParameters();
         }
     }
 }

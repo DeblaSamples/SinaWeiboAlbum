@@ -24,6 +24,8 @@ public class Config {
     
     public static class Network {
         public static final int HttpRequestThreadCount = Runtime.getRuntime().availableProcessors();
+        public static final int HttpConnectTimeout     = 10 * 1000;
+        public static final int HttpReadTimeout        = 30 * 1000;
     }
     
     public static class LaunchPage {
