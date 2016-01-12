@@ -8,10 +8,8 @@ import java.util.List;
 import com.cocoonshu.network.HttpCode;
 import com.cocoonshu.network.HttpListener;
 import com.cocoonshu.network.HttpRequest;
-import com.cocoonshu.network.HttpRequestor;
 import com.cocoonshu.network.HttpResponse;
 import com.cocoonshu.sina.weibo.network.AccessTokenRequest;
-import com.cocoonshu.sina.weibo.network.WeiboAPI;
 import com.cocoonshu.sina.weibo.util.Config;
 import com.cocoonshu.sina.weibo.util.Debugger;
 

@@ -92,4 +92,13 @@ public enum HttpCode {
     public final int getStatusCode() {
         return mCode;
     }
+
+    public static HttpCode valueOf(int responseCode) {
+        for (HttpCode item : HttpCode.values()) {
+            if (item.mCode == responseCode) {
+                return item;
+            }
+        }
+        return Unknown;
+    }
 }

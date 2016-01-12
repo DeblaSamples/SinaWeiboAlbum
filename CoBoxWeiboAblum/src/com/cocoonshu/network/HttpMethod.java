@@ -11,8 +11,7 @@ public enum HttpMethod {
     HEAD   ("HEAD"),
     PUT    ("PUT"),
     DELETE ("DELETE"),
-    OPTIONS("OPTIONS"), 
-    TRACE  ("TRACE");
+    OPTIONS("OPTIONS");
 
     private String mMethod = null;
 

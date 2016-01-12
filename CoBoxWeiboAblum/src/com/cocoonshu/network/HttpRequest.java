@@ -1,10 +1,12 @@
 package com.cocoonshu.network;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 
 import com.cocoonshu.sina.weibo.util.Config;
 import com.cocoonshu.sina.weibo.util.Debugger;
@@ -15,15 +17,15 @@ import com.cocoonshu.sina.weibo.util.Debugger;
  * @author Cocoonshu
  * @date   2016-01-06
  */
-@SuppressWarnings("deprecation")
 public abstract class HttpRequest {
 
     private static final String TAG = "HttpRequest";
     
-    private HttpCode      mHttpStatusCode = HttpCode.Undefined;
-    private HttpAPI       mHttpAPI        = null;
-    private HttpResponse  mHttpResponse   = null;
-    private HttpURLConnection mConnection = null;
+    private HttpCode            mHttpStatusCode = HttpCode.Undefined;
+    private HttpAPI             mHttpAPI        = null;
+    private HttpResponse        mHttpResponse   = null;
+    private HttpURLConnection   mConnection     = null;
+    private volatile boolean    mIsCanceled     = false;
     
     public HttpRequest() {
         
@@ -37,7 +39,15 @@ public abstract class HttpRequest {
      * Execute an http request.
      */
     public void execute() {
-        if (onRequestPrepare()) {
+        boolean isPrepared = false;
+        
+        try {
+            isPrepared = onRequestPrepare();
+        } finally {
+            // Do nothing
+        }
+        
+        if (isPrepared) {
             try {
                 URL url = new URL(mHttpAPI.getMethodedUrl());
                 mConnection = (HttpURLConnection) url.openConnection();
@@ -48,46 +58,104 @@ public abstract class HttpRequest {
                 
                 HttpMethod method = mHttpAPI.getMehthod();
                 switch (method) {
-                case GET:
+                case GET: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(false);
+                }
                     break;
 
-                case POST:
+                case POST: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(true);
-                    break;
-                    
-                case OPTIONS:
-                    // FIXME
-                    break;
-                    
-                case DELETE:
-                    // FIXME
-                    break;
-                    
-                case HEAD:
-                    // FIXME
-                    break;
-                    
-                case PUT:
-                    // FIXME
-                    break;
-                    
-                case TRACE:
-                    // FIXME
-                    break;
-                  
+
+                    // Write out request data
+                    OutputStream sout = mConnection.getOutputStream();
+                    try {
+                        if (sout != null) {
+                            onRequest(sout);
+                        }
+                    } finally {
+                        if (sout != null) {
+                            sout.flush();
+                            sout.close();
+                        }
+                    }
                 }
+                    break;
+                    
+                case OPTIONS: {
+                    mConnection.setDoInput(true);
+                    mConnection.setDoOutput(false);
+                    // FIXME Finish this implements
+                }
+                    break;
+                    
+                case DELETE: {
+                    mConnection.setDoInput(true);
+                    mConnection.setDoOutput(false);
+                    // FIXME Finish this implements
+                }
+                    break;
+                    
+                case HEAD: {
+                    mConnection.setDoInput(true);
+                    mConnection.setDoOutput(false);
+                    // FIXME Finish this implements
+                }
+                    break;
+                    
+                case PUT: {
+                    mConnection.setDoInput(true);
+                    mConnection.setDoOutput(true);
+                    // FIXME Finish this implements
+                }
+                    break;
+                }
+                
+                // Read response from server
+                InputStream sin = null;
+                try {
+                    sin             = new BufferedInputStream(mConnection.getInputStream());
+                    mHttpStatusCode = HttpCode.valueOf(mConnection.getResponseCode());
+                    mHttpResponse   = new HttpResponse(mHttpAPI, mHttpStatusCode);
+                    try {
+                        mHttpResponse.processResponding(mConnection.getHeaderFields(), sin);
+                    } finally {
+                        if (sin != null) {
+                            sin.close();
+                        }
+                    }
+                } catch (IOException exp) {
+                    sin             = new BufferedInputStream(mConnection.getErrorStream());
+                    mHttpStatusCode = HttpCode.valueOf(mConnection.getResponseCode());
+                    mHttpResponse   = new HttpResponse(mHttpAPI, mHttpStatusCode);
+                    try {
+                        mHttpResponse.processRespondingError(sin);
+                    } finally {
+                        if (sin != null) {
+                            sin.close();
+                        }
+                    }
+                }
+                
             } catch (MalformedURLException exp) {
                 Debugger.printTrace(TAG, "[execute] Url is invalidable.", exp);
             } catch (IOException exp) {
                 Debugger.printTrace(TAG, "[execute] Connection open failed.", exp);
+            } finally {
+                // Disconnect
+                if (mConnection != null) {
+                    mConnection.disconnect();
+                }
             }
-            mHttpResponse = new HttpResponse();
-            mHttpResponse.setResponseData(onRequest());
+
         }
-        onPostRequest();
+        
+        try {
+            onPostRequest(mHttpResponse);
+        } finally {
+            // Do nothing
+        }
     }
 
     /**
@@ -99,15 +167,22 @@ public abstract class HttpRequest {
     
     /**
      * On the processing of requesting
+     * @param responseHeaders 
+     * @param buffer 
      * @return Return the result data of requesting operation.
      */
-    abstract protected Object onRequest();
+    protected void onRequest(OutputStream sout) throws IOException {
+        if (mHttpAPI != null) {
+            sout.write(mHttpAPI.getMethodedParameters().getBytes());
+        }
+    }
     
     /**
      * Request completed. You can notify UI to responded
      * by this request result here.
+     * @param response 
      */
-    abstract protected void onPostRequest();
+    abstract protected void onPostRequest(HttpResponse response);
     
     /**
      * Does request go wrong ?
