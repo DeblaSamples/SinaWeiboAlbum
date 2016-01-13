@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.cocoonshu.network.HttpResponseHeader.ContentType;
 import com.cocoonshu.sina.weibo.util.Config;
+import com.cocoonshu.sina.weibo.util.Debugger;
 
 /**
  * Http response
@@ -17,17 +18,22 @@ public class HttpResponse {
 
     private static final String TAG = "HttpResponse";
     
-    private HttpCode mHttpStatusCode = HttpCode.Undefined;
-    
-    private HttpAPI  mHttpAPI        = null;
-    private Object   mHttpResponse   = null;
+    private HttpCode    mHttpStatusCode   = HttpCode.Undefined;
+    private HttpRequest mHttpRequest      = null;
+    private HttpAPI     mHttpAPI          = null;
+    private Object      mHttpResponseData = null;
     
     protected HttpResponse(HttpAPI api, HttpCode statusCode) {
         mHttpAPI = api;
         mHttpStatusCode = statusCode;
     }
     
+    protected void setParentRequest(HttpRequest httpRequest) {
+        mHttpRequest = httpRequest;
+    }
+    
     protected void processRespondingError(InputStream sin) {
+        Debugger.e(TAG, "[processRespondingError] Status code: " + mHttpStatusCode.toString());
         onRespondErroring(sin);
     }
     
@@ -76,7 +82,7 @@ public class HttpResponse {
                 e.printStackTrace();
             }
             
-            mHttpResponse = content.toString();
+            mHttpResponseData = content.toString();
         }
     }
     
@@ -86,7 +92,7 @@ public class HttpResponse {
      * @return
      */
     public Object getResponseData() {
-        return mHttpResponse;
+        return mHttpResponseData;
     }
 
     /**
@@ -105,5 +111,13 @@ public class HttpResponse {
      */
     public final HttpAPI getHttpAPI() {
         return mHttpAPI;
+    }
+
+    /**
+     * Get the relative request of this response
+     * @return
+     */
+    public HttpRequest getResquest() {
+        return mHttpRequest;
     }
 }

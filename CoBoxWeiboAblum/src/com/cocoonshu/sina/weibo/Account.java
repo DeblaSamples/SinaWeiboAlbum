@@ -19,6 +19,11 @@ public class Account {
         mAppSecret = appSecret;
     }
 
+    public Account(Account account) {
+        mAppKey    = account.getAppKey();
+        mAppSecret = account.getAppSecret();
+    }
+
     public final String getAppKey() {
         return mAppKey;
     }

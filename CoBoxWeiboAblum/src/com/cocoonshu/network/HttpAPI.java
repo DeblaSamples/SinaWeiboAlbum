@@ -1,11 +1,6 @@
 package com.cocoonshu.network;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -137,7 +132,7 @@ public abstract class HttpAPI {
      * Get methoded url for requesting. This string
      * will be formated depends on the specified http
      * method.
-     * @return GET will return url + parameter list
+     * @return GET will return url + parameter list <br>
      *         POST will return url
      */
     public final String getMethodedUrl() {

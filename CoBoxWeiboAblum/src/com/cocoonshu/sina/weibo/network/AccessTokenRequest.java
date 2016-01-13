@@ -3,6 +3,7 @@ package com.cocoonshu.sina.weibo.network;
 import com.cocoonshu.network.HttpRequest;
 import com.cocoonshu.network.HttpResponse;
 import com.cocoonshu.sina.weibo.Account;
+import com.cocoonshu.sina.weibo.util.Debugger;
 
 /**
  * Request with the access token api
@@ -11,24 +12,39 @@ import com.cocoonshu.sina.weibo.Account;
  */
 public class AccessTokenRequest extends HttpRequest {
 
+    private static final String TAG = "AccessTokenRequest";
+    
     private Account mAccount = null;
     
     public AccessTokenRequest(Account account) {
         mAccount = account;
+        setHttpApi(new AccessToken());
+    }
+    
+    public Account getAccount() {
+        return mAccount;
     }
     
     @Override
     protected boolean onRequestPrepare() {
         if (mAccount != null) {
-            
+            AccessToken api = (AccessToken) getHttpApi();
+            api.setAccount(mAccount);
+            return true;
+        } else {
+            return true;
         }
-        return false;
     }
 
     @Override
     protected void onPostRequest(HttpResponse response) {
-        // TODO Auto-generated method stub
-        
+        String json = (String) response.getResponseData();
+        AccessToken api = (AccessToken) getHttpApi();
+        Account account = (Account) api.parseResponse(json, null);
+        mAccount.setUid(account.getUid());
+        mAccount.setRemindIn(account.getRemindIn());
+        mAccount.setExpiresIn(account.getExpiresIn());
+        mAccount.setAccessToken(account.getAccessToken());
     }
 
 }

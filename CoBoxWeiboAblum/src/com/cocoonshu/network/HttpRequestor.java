@@ -43,6 +43,11 @@ public class HttpRequestor {
         
         @Override
         public void run() {
+            if (mHttpRequest == null) {
+                mIsCanceled = true;
+                return;
+            }
+            
             // Cancel policy
             if (mIsRequestCancel) {
                 mIsCanceled = true;
@@ -55,7 +60,7 @@ public class HttpRequestor {
                     mHttpRequest.execute();
                     if (mHttpListener != null) {
                         if (mHttpRequest.isError()) {
-                            mHttpListener.onError(mHttpRequest.getStatusCode());
+                            mHttpListener.onError(mHttpRequest.getResponse(), mHttpRequest.getStatusCode());
                         } else {
                             mHttpListener.onResponed(mHttpRequest.getResponse());
                         }
@@ -63,7 +68,7 @@ public class HttpRequestor {
                 }
             } catch(Throwable thr) {
                 if (mHttpListener != null) {
-                    mHttpListener.onError(HttpCode.Unknown);
+                    mHttpListener.onError(mHttpRequest.getResponse(), HttpCode.Unknown);
                 }
             }
             

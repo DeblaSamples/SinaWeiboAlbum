@@ -10,7 +10,7 @@ import com.cocoonshu.sina.weibo.Account;
 public class WeiboAPI {
 
     public static final String AUTH_URL                 = "https://open.weibo.cn/";
-    public static final String API_URL                  = "https://api.weibo.com/";
+    public static final String API_URL                  = "http://api.weibo.com/";
     public static final String AUTH_REDIRECT_URL        = "https://api.weibo.com/oauth2/default.html";
     
     public static final String API_AUTHORIZE            = "oauth2/authorize";

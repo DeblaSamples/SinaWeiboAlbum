@@ -13,6 +13,11 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+/**
+ * Authorize page for user
+ * @author Cocoonshu
+ * @date   2016-01-13
+ */
 public class AuthorizePage extends Activity {
 
     protected static final String TAG             = "AuthorizePage";
@@ -21,7 +26,6 @@ public class AuthorizePage extends Activity {
     
     private WebView   mWebAuthorize        = null;
     private Authorize mAuthorizeApi        = null;
-    private Account   mAccount             = null;
     private String    mAuthorizeUrl        = null;
     private int       mAuthorizeCallbackID = ValidCallbackID;
 
@@ -46,8 +50,8 @@ public class AuthorizePage extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        mAccount      = Weibo.getInstance().getAccountManager().getAccount();
-        mAuthorizeApi = new Authorize(mAccount);
+        Account account = Weibo.getInstance().getAccountManager().obtainAccount();
+        mAuthorizeApi = new Authorize(account);
         mAuthorizeUrl = mAuthorizeApi.getMethodedUrl();
         mWebAuthorize.loadUrl(mAuthorizeUrl);
         Debugger.i(TAG, "[onResume] Load authorize url: " + mAuthorizeUrl);
@@ -84,9 +88,8 @@ public class AuthorizePage extends Activity {
         String         authorizeCode  = (String) mAuthorizeApi.parseResponse(url, null);
         
         Debugger.i(TAG, "[processAuthorize] Authorize code: " + authorizeCode);
-        mAccount.setAuthorizationCode(authorizeCode);
+        accountManager.setAuthorizationCode(authorizeCode);
         accountManager.takeAccessToken(mAuthorizeCallbackID);
-        accountManager.authorizeCallback(mAuthorizeCallbackID, mAccount);
         finish();
     }
 }

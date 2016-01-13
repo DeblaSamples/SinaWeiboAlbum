@@ -77,12 +77,64 @@ public class AccountManager {
                  + "                                                 AppKey:    " + appKey + "\n"
                  + "                                                 AppSecret: " + appSecret);
 
-        mAccount.setAppKey(appKey);
-        mAccount.setAppSecret(appSecret);
+        synchronized (mAccount) {
+            mAccount.setAppKey(appKey);
+            mAccount.setAppSecret(appSecret);
+        }
     }
 
     /**
-     * Add a listener to listen Authentication state
+     * Obtain an new Account instance that has
+     * copied account content of AccountManager.
+     * @return
+     */
+    public Account obtainAccount() {
+        return new Account(mAccount);
+    }
+    
+    /**
+     * Get the app key of the sina weibo api
+     * @return An app key string, or null.
+     */
+    public final String getAppKey() {
+        synchronized (mAccount) {
+            return mAccount.getAppKey();
+        }
+    }
+
+    /**
+     * Get the app secret of the sina weibo api
+     * @return An app secret string, or null.
+     * @see #getAppKey()
+     */
+    public final String getAppSecret() {
+        synchronized (mAccount) {
+            return mAccount.getAppSecret();
+        }
+    }
+    
+    /**
+     * Get access token.
+     */
+    public final String getAccessToken() {
+        synchronized (mAccount) {
+            return mAccount.getAccessToken();
+        }
+    }
+    
+    /**
+     * Set an authorization code to the inner account
+     * instance of AccountManager.
+     * @param authorizeCode
+     */
+    final void setAuthorizationCode(String authorizeCode) {
+        synchronized (mAccount) {
+            mAccount.setAuthorizationCode(authorizeCode);
+        }
+    }
+    
+    /**
+     * Add a listener to listen authentication state.
      * @param listener
      * @see #removeOnAuthListener(OnAuthListener)
      */
@@ -93,7 +145,7 @@ public class AccountManager {
     }
 
     /**
-     * Remove an Authentication state listener
+     * Remove an Authentication state listener.
      * @param listener
      * @see #addOnAuthListener(OnAuthListener)
      */
@@ -101,29 +153,8 @@ public class AccountManager {
         mOnAuthListeners.remove(listener);
     }
 
-    public Account getAccount() {
-        return mAccount;
-    }
-    
     /**
-     * Get the app key of the sina weibo api
-     * @return An app key string, or null
-     */
-    public final String getAppKey() {
-        return mAccount.getAppKey();
-    }
-
-    /**
-     * Get the app secret of the sina weibo api
-     * @return An app secret string, or null
-     * @see #getAppKey()
-     */
-    public final String getAppSecret() {
-        return mAccount.getAppSecret();
-    }
-
-    /**
-     * Authorize to the weibo api of the sina
+     * Authorize to the weibo api of the sina.
      * @see #unauthorize()
      */
     public void authorize(Context context) {
@@ -148,27 +179,27 @@ public class AccountManager {
         }
     }
     
-    public void authorizeCallback(int authorizeCallbackID, Account account) {
-        mAccount.setAuthorizationCode(account.getAuthorizationCode());
-        takeAccessToken(authorizeCallbackID);
-    }
-    
     /**
-     * Take access token
+     * Take access token.
      */
     public void takeAccessToken(final int authorizeCallbackID) {
-        HttpRequest request = new AccessTokenRequest(mAccount);
+        HttpRequest request = new AccessTokenRequest(new Account(mAccount));
         Weibo.getInstance().submitHttpRequest(request, new HttpListener() {
             
             @Override
             public void onResponed(HttpResponse response) {
-                Account account = (Account)response.getResponseData();
-                mAccount.setAccessToken(account.getAccessToken());
+                Account account = ((AccessTokenRequest)response.getResquest()).getAccount();
+                synchronized (mAccount) {
+                    mAccount.setUid(account.getUid());
+                    mAccount.setRemindIn(account.getRemindIn());
+                    mAccount.setExpiresIn(account.getExpiresIn());
+                    mAccount.setAccessToken(account.getAccessToken());
+                }
                 notifyAuthCallback();
             }
             
             @Override
-            public void onError(HttpCode code) {
+            public void onError(HttpResponse response, HttpCode code) {
                 notifyAuthCallback();
             }
             
@@ -192,7 +223,7 @@ public class AccountManager {
     }
     
     /**
-     * Unauthorize from the weibo api of the sina
+     * Unauthorize from the weibo api of the sina.
      * @see #authorize()
      */
     public void unauthorize(Context context) {

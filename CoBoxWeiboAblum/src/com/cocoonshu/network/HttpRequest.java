@@ -35,6 +35,10 @@ public abstract class HttpRequest {
         mHttpAPI = api;
     }
     
+    protected final HttpAPI getHttpApi() {
+        return mHttpAPI;
+    }
+    
     /**
      * Execute an http request.
      */
@@ -119,6 +123,7 @@ public abstract class HttpRequest {
                     mHttpStatusCode = HttpCode.valueOf(mConnection.getResponseCode());
                     mHttpResponse   = new HttpResponse(mHttpAPI, mHttpStatusCode);
                     try {
+                        mHttpResponse.setParentRequest(this);
                         mHttpResponse.processResponding(mConnection.getHeaderFields(), sin);
                     } finally {
                         if (sin != null) {
@@ -130,6 +135,7 @@ public abstract class HttpRequest {
                     mHttpStatusCode = HttpCode.valueOf(mConnection.getResponseCode());
                     mHttpResponse   = new HttpResponse(mHttpAPI, mHttpStatusCode);
                     try {
+                        mHttpResponse.setParentRequest(this);
                         mHttpResponse.processRespondingError(sin);
                     } finally {
                         if (sin != null) {

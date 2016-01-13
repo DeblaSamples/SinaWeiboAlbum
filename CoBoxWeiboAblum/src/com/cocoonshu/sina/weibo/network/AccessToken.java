@@ -6,7 +6,6 @@ import org.json.JSONObject;
 import com.cocoonshu.network.HttpAPI;
 import com.cocoonshu.network.HttpMethod;
 import com.cocoonshu.sina.weibo.Account;
-import com.cocoonshu.sina.weibo.AccountManager;
 import com.cocoonshu.sina.weibo.Weibo;
 import com.cocoonshu.sina.weibo.util.Debugger;
 
@@ -37,7 +36,7 @@ public class AccessToken extends HttpAPI {
         setParameterValue(WeiboAPI.PARAM_REDIRECT_URI,  WeiboAPI.AUTH_REDIRECT_URL);
     }
 
-    public void getAccount(Account account) {
+    public void setAccount(Account account) {
         setParameterValue(
                 WeiboAPI.PARAM_CLIENT_ID,     Weibo.getInstance().getAccountManager().getAppKey(),
                 WeiboAPI.PARAM_CLIENT_SECRET, Weibo.getInstance().getAccountManager().getAppSecret(),

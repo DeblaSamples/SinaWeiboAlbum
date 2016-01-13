@@ -79,6 +79,9 @@ public class LaunchActivity extends Activity {
                                 Intent intent = new Intent(mContext, MainActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 mContext.startActivity(intent);
+
+                                String accessToken = Weibo.getInstance().getAccountManager().getAccessToken();
+                                Debugger.i(TAG, "[startActivity] access token: " + accessToken);
                             }
                             
                         });
