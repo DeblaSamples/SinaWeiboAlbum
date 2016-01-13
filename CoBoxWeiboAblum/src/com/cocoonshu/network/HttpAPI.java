@@ -1,7 +1,11 @@
 package com.cocoonshu.network;
 
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Http API package
@@ -171,4 +175,19 @@ public abstract class HttpAPI {
             return getApiUrl() + getApiParameters();
         }
     }
+
+    final void processSecurity(HttpsURLConnection connection) {
+        onSecuritySetup(connection);
+    }
+
+    /**
+     * Should setup HostnameVerifier and
+     * SSLSocketFactory instance in this
+     * life-cycle method.
+     * @param connection
+     */
+    protected void onSecuritySetup(HttpsURLConnection connection) {
+        // Do nothing
+    }
+    
 }

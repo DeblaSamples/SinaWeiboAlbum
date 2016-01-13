@@ -20,8 +20,13 @@ public class Account {
     }
 
     public Account(Account account) {
-        mAppKey    = account.getAppKey();
-        mAppSecret = account.getAppSecret();
+        mAppKey            = account.mAppKey;
+        mAppSecret         = account.mAppSecret;
+        mAuthorizationCode = account.mAuthorizationCode;
+        mAccessToken       = account.mAccessToken;
+        mUID               = account.mUID;
+        mRemindIn          = account.mRemindIn;
+        mExpiresIn         = account.mExpiresIn;
     }
 
     public final String getAppKey() {

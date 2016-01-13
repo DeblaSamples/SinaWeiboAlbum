@@ -1,5 +1,7 @@
 
-package com.cocoonshu.coboxweiboablum;
+package com.cocoonshu.coboxweiboalbum;
+
+import com.cocoonshu.coboxweiboalbum.R;
 
 import android.os.Bundle;
 import android.app.Activity;

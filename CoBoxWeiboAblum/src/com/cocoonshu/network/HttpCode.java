@@ -93,6 +93,11 @@ public enum HttpCode {
         return mCode;
     }
 
+    @Override
+    public String toString() {
+        return String.format("[%d] %s", mCode, mMessage);
+    }
+    
     public static HttpCode valueOf(int responseCode) {
         for (HttpCode item : HttpCode.values()) {
             if (item.mCode == responseCode) {

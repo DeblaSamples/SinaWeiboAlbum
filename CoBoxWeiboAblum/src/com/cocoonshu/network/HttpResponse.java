@@ -51,6 +51,23 @@ public class HttpResponse {
      */
     public void onRespondErroring(InputStream sin) {
         // Let subclass implemention to deal with this
+        {// Debug
+            byte[]        buffer  = new byte[Config.Network.HttpResponseByteBufferSize];
+            StringBuilder content = new StringBuilder();
+            
+            try {
+                int readCount = 0;
+                do {
+                    readCount = sin.read(buffer);
+                    if (readCount > 0) {
+                        content.append(new String(buffer, 0, readCount));
+                    }
+                } while (readCount > -1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Debugger.w(TAG, "[onRespondErroring] error: " + content);
+        }
     }
 
     /**
@@ -66,7 +83,7 @@ public class HttpResponse {
         HttpResponseHeader headerMap   = new HttpResponseHeader(headerFields);
         String             contentType = headerMap.getString(HttpResponseHeader.ContentType);
         
-        if (ContentType.isTextType(contentType)) {
+        if (ContentType.isTextType(contentType) || true) {
             byte[]        buffer  = new byte[Config.Network.HttpResponseByteBufferSize];
             StringBuilder content = new StringBuilder();
             
@@ -83,6 +100,7 @@ public class HttpResponse {
             }
             
             mHttpResponseData = content.toString();
+            Debugger.w(TAG, "[onResponding] response: " + content);
         }
     }
     

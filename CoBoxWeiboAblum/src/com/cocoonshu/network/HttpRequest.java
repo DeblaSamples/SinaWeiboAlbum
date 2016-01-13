@@ -7,6 +7,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import com.cocoonshu.sina.weibo.util.Config;
 import com.cocoonshu.sina.weibo.util.Debugger;
@@ -54,23 +57,32 @@ public abstract class HttpRequest {
         if (isPrepared) {
             try {
                 URL url = new URL(mHttpAPI.getMethodedUrl());
-                mConnection = (HttpURLConnection) url.openConnection();
+                URLConnection geneicConnection = url.openConnection();
+                mConnection = (HttpURLConnection) geneicConnection;
                 mConnection.setConnectTimeout(Config.Network.HttpConnectTimeout);
                 mConnection.setReadTimeout(Config.Network.HttpReadTimeout);
                 mConnection.setInstanceFollowRedirects(true);
                 mConnection.setRequestMethod(mHttpAPI.getMehthod().getMethodString());
+                
+                // Apply security property on connection
+                Debugger.i(TAG, "[execute] Url will open an " + geneicConnection.getClass().getSimpleName());
+                if (url.getProtocol().equals("https")) {
+                    mHttpAPI.processSecurity((HttpsURLConnection)mConnection);
+                }
                 
                 HttpMethod method = mHttpAPI.getMehthod();
                 switch (method) {
                 case GET: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(false);
+                    mConnection.connect();
                 }
                     break;
 
                 case POST: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(true);
+                    mConnection.connect();
 
                     // Write out request data
                     OutputStream sout = mConnection.getOutputStream();
@@ -90,6 +102,7 @@ public abstract class HttpRequest {
                 case OPTIONS: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(false);
+                    mConnection.connect();
                     // FIXME Finish this implements
                 }
                     break;
@@ -97,6 +110,7 @@ public abstract class HttpRequest {
                 case DELETE: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(false);
+                    mConnection.connect();
                     // FIXME Finish this implements
                 }
                     break;
@@ -104,6 +118,7 @@ public abstract class HttpRequest {
                 case HEAD: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(false);
+                    mConnection.connect();
                     // FIXME Finish this implements
                 }
                     break;
@@ -111,6 +126,7 @@ public abstract class HttpRequest {
                 case PUT: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(true);
+                    mConnection.connect();
                     // FIXME Finish this implements
                 }
                     break;

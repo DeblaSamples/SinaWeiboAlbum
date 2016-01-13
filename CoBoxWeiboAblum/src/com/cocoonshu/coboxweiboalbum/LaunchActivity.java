@@ -1,5 +1,6 @@
-package com.cocoonshu.coboxweiboablum;
+package com.cocoonshu.coboxweiboalbum;
 
+import com.cocoonshu.coboxweiboalbum.R;
 import com.cocoonshu.sina.weibo.AccountManager;
 import com.cocoonshu.sina.weibo.Weibo;
 import com.cocoonshu.sina.weibo.util.Config;

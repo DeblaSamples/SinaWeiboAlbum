@@ -1,6 +1,6 @@
 package com.cocoonshu.sina.weibo;
 
-import com.cocoonshu.coboxweiboablum.R;
+import com.cocoonshu.coboxweiboalbum.R;
 import com.cocoonshu.sina.weibo.network.Authorize;
 import com.cocoonshu.sina.weibo.network.WeiboAPI;
 import com.cocoonshu.sina.weibo.util.Debugger;
