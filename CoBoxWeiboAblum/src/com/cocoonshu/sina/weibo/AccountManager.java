@@ -9,7 +9,7 @@ import com.cocoonshu.network.HttpCode;
 import com.cocoonshu.network.HttpListener;
 import com.cocoonshu.network.HttpRequest;
 import com.cocoonshu.network.HttpResponse;
-import com.cocoonshu.sina.weibo.network.AccessTokenRequest;
+import com.cocoonshu.sina.weibo.network.auth.AccessTokenRequest;
 import com.cocoonshu.sina.weibo.util.Config;
 import com.cocoonshu.sina.weibo.util.Debugger;
 
@@ -119,6 +119,16 @@ public class AccountManager {
     public final String getAccessToken() {
         synchronized (mAccount) {
             return mAccount.getAccessToken();
+        }
+    }
+    
+    /**
+     * Get uid of current user
+     * @return
+     */
+    public final String getUID() {
+        synchronized (mAccount) {
+            return mAccount.getUid();
         }
     }
     

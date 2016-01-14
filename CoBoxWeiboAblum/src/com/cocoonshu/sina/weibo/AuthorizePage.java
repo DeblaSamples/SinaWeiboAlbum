@@ -1,8 +1,8 @@
 package com.cocoonshu.sina.weibo;
 
 import com.cocoonshu.coboxweiboablum.R;
-import com.cocoonshu.sina.weibo.network.Authorize;
 import com.cocoonshu.sina.weibo.network.WeiboAPI;
+import com.cocoonshu.sina.weibo.network.auth.Authorize;
 import com.cocoonshu.sina.weibo.util.Debugger;
 
 import android.annotation.SuppressLint;

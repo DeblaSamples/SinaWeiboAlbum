@@ -65,12 +65,14 @@ public abstract class HttpRequest {
                 case GET: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(false);
+                    mConnection.connect();
                 }
                     break;
 
                 case POST: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(true);
+                    mConnection.connect();
 
                     // Write out request data
                     OutputStream sout = mConnection.getOutputStream();
@@ -90,6 +92,7 @@ public abstract class HttpRequest {
                 case OPTIONS: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(false);
+                    mConnection.connect();
                     // FIXME Finish this implements
                 }
                     break;
@@ -97,6 +100,7 @@ public abstract class HttpRequest {
                 case DELETE: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(false);
+                    mConnection.connect();
                     // FIXME Finish this implements
                 }
                     break;
@@ -104,6 +108,7 @@ public abstract class HttpRequest {
                 case HEAD: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(false);
+                    mConnection.connect();
                     // FIXME Finish this implements
                 }
                     break;
@@ -111,6 +116,7 @@ public abstract class HttpRequest {
                 case PUT: {
                     mConnection.setDoInput(true);
                     mConnection.setDoOutput(true);
+                    mConnection.connect();
                     // FIXME Finish this implements
                 }
                     break;

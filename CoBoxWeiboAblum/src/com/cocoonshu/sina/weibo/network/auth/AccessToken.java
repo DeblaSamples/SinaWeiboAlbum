@@ -1,4 +1,4 @@
-package com.cocoonshu.sina.weibo.network;
+package com.cocoonshu.sina.weibo.network.auth;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -7,6 +7,8 @@ import com.cocoonshu.network.HttpAPI;
 import com.cocoonshu.network.HttpMethod;
 import com.cocoonshu.sina.weibo.Account;
 import com.cocoonshu.sina.weibo.Weibo;
+import com.cocoonshu.sina.weibo.network.WeiboAPI;
+import com.cocoonshu.sina.weibo.network.WeiboAPI.JSON;
 import com.cocoonshu.sina.weibo.util.Debugger;
 
 /**
