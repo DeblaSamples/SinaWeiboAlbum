@@ -1,9 +1,8 @@
-package com.cocoonshu.sina.weibo.network;
+package com.cocoonshu.sina.weibo.network.auth;
 
 import com.cocoonshu.network.HttpRequest;
 import com.cocoonshu.network.HttpResponse;
 import com.cocoonshu.sina.weibo.Account;
-import com.cocoonshu.sina.weibo.util.Debugger;
 
 /**
  * Request with the access token api
